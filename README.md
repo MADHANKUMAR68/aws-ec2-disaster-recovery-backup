@@ -58,19 +58,15 @@ Add screenshots of:
 
 Create an S3 bucket to store backup manifest files.
 
-Example bucket name:
+Example bucket name:your bucket name
 
 
-madhan-ec2-dr-backup-metadata
+### Create folders inside the bucket:
 
-
-Create folders inside the bucket:
-
-
-manifests/
-logs/
-recovery/
-reports/
+     manifests/
+     logs/
+     recovery/
+     reports/
 
 
 ---
@@ -79,11 +75,7 @@ reports/
 
 Create an SNS topic to receive backup notifications.
 
-Topic name:
-
-
-ec2-backup-alerts
-
+Topic name:your-topic-name
 
 Add email subscription.
 
@@ -95,19 +87,16 @@ Confirm the subscription from your email inbox.
 
 Create an IAM role for Lambda.
 
-Role name:
-
-
-lambda-ec2-backup-role
+Role name:your-role-name
 
 
 Attach these policies:
 
 
-AmazonEC2FullAccess
-AmazonS3FullAccess
-AmazonSNSFullAccess
-CloudWatchLogsFullAccess
+    AmazonEC2FullAccess
+    AmazonS3FullAccess
+    AmazonSNSFullAccess
+    CloudWatchLogsFullAccess
 
 
 ---
@@ -116,16 +105,10 @@ CloudWatchLogsFullAccess
 
 Create a Lambda function.
 
-Function name:
+Function name: ec-backup
 
 
-ec2-snapshot-backup
-
-
-Runtime:
-
-
-Python 3.x
+Runtime: Python 3.x
 
 
 Attach IAM role created earlier.
@@ -137,10 +120,10 @@ Attach IAM role created earlier.
 Add environment variables in Lambda configuration.
 
 
-BUCKET_NAME = madhan-ec2-dr-backup-metadata
-SNS_TOPIC_ARN = your-sns-topic-arn
-BACKUP_TAG_KEY = Backup
-BACKUP_TAG_VALUE = true
+    BUCKET_NAME = your-bucket-name
+    SNS_TOPIC_ARN = your-sns-topic-arn
+    BACKUP_TAG_KEY = Backup
+    BACKUP_TAG_VALUE = true
 
 
 ---
@@ -150,8 +133,8 @@ BACKUP_TAG_VALUE = true
 Add the following tag to the EC2 instance.
 
 
-Key = Backup
-Value = true
+    Key = Backup
+    Value = true
 
 
 This ensures only selected instances are backed up.
@@ -163,7 +146,7 @@ This ensures only selected instances are backed up.
 Upload the backup automation script inside:
 
 
-lambda/lambda_function.py
+    lambda/lambda_function.py
 
 
 The Lambda function performs:
@@ -182,7 +165,7 @@ The Lambda function performs:
 Create a test event.
 
 
-{}
+    {}
 
 
 Run the Lambda function.
@@ -201,10 +184,7 @@ Verify the following resources.
 
 ### EC2 Snapshots
 
-Navigate to:
-
-
-EC2 → Snapshots
+Navigate to: EC2 → Snapshots
 
 
 Confirm new snapshot exists.
@@ -213,10 +193,7 @@ Confirm new snapshot exists.
 
 ### S3 Manifest File
 
-Navigate to:
-
-
-S3 → madhan-ec2-dr-backup-metadata → manifests/
+Navigate to: S3 → madhan-ec2-dr-backup-metadata → manifests/
 
 
 Confirm JSON manifest file.
@@ -231,10 +208,7 @@ Check email inbox for backup notification.
 
 ### CloudWatch Logs
 
-Navigate to:
-
-
-CloudWatch → Log Groups → /aws/lambda/ec2-snapshot-backup
+Navigate to: CloudWatch → Log Groups → /aws/lambda/your-ec2-snapshot-backup
 
 
 Confirm Lambda execution logs.
@@ -247,37 +221,24 @@ Open **EventBridge Scheduler**.
 
 Create schedule.
 
-Schedule name:
+Schedule name: something-like-ec2-daily-snapshot-backup
 
 
-ec2-daily-snapshot-backup
+Schedule type: Recurring
 
 
-Schedule type:
-
-
-Recurring
-
-
-Cron expression:
-
-
-cron(0 2 * * ? *)
+Cron expression: cron(0 2 * * ? *)
 
 
 This runs backup daily at **2:00 AM**.
 
-Target:
-
-
-Lambda → ec2-snapshot-backup
+Target: Lambda → ec2-snapshot-backup
 
 
 Input:
 
 
-{}
-
+     {}
 
 ---
 
@@ -296,23 +257,7 @@ This prevents unnecessary storage costs.
 
 ---
 
-# Final Architecture Flow
 
-
-EventBridge Scheduler
-│
-▼
-Lambda Function
-│
-▼
-EBS Snapshots
-│
-┌───────────────┬───────────────┐
-▼ ▼
-S3 Manifest SNS Email Alert
-
-
----
 
 # Project Features
 
